@@ -1233,6 +1233,10 @@ section:not(#hero)::before { background:linear-gradient(90deg,transparent,rgba(1
 }
 #finale.candles-ready .ritual-status { opacity:1; transform:translateX(-50%); }
 #finale.candles-ready .cake { cursor:pointer; filter:drop-shadow(0 34px 70px rgba(255,199,102,.34)); animation:cakeReadyPulse 2s ease-in-out infinite; }
+#finale.wished .star-birthday-message,
+#finale.wished .candle-rack,
+#finale.wished .ritual-status { opacity:0; pointer-events:none; transition:opacity .65s ease; }
+#finale.wished .finale-ritual { z-index:0; }
 @keyframes cakeReadyPulse { 50% { transform:scale(1.025); filter:drop-shadow(0 40px 85px rgba(255,199,102,.48)); } }
 
 .wish-dialog { background:rgba(4,2,13,.82); }
