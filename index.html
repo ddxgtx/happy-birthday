@@ -1323,6 +1323,44 @@ body.film-started .film-guide { transform:translateY(-50%); opacity:1; }
 .chapter-flash-title { margin-top:12px; color:#fff; font-size:clamp(34px,6vw,78px); font-weight:750; letter-spacing:-.03em; }
 .chapter-flash-line { width:72px; height:1px; margin:18px auto 0; background:linear-gradient(90deg,transparent,#ffd99e,transparent); }
 
+.cinema-intro {
+  position:fixed; inset:0; z-index:1100; display:grid; place-items:center; padding:24px;
+  background:radial-gradient(circle at 50% 42%,rgba(73,42,111,.24),transparent 34%),#020207;
+  opacity:0; visibility:hidden; pointer-events:none; transition:opacity .55s ease,visibility .55s ease;
+}
+.cinema-intro.show { opacity:1; visibility:visible; pointer-events:auto; }
+.cinema-intro::before,.cinema-intro::after { content:""; position:absolute; left:0; right:0; height:1px; background:rgba(255,255,255,.08); }
+.cinema-intro::before { top:8%; }.cinema-intro::after { bottom:8%; }
+.cinema-intro-inner { width:min(720px,92vw); text-align:center; }
+.cinema-intro-kicker { color:#d5b7ff; font-size:10px; font-weight:800; letter-spacing:.32em; }
+.cinema-intro-title { margin-top:24px; color:#fff; font-size:clamp(32px,6vw,72px); line-height:1.12; letter-spacing:-.04em; }
+.cinema-intro-subtitle { margin:18px auto 0; color:rgba(255,255,255,.48); font-size:13px; letter-spacing:.12em; }
+.cinema-intro-count { min-height:110px; margin-top:28px; color:#ffe0ab; font:800 clamp(72px,15vw,132px)/.85 Georgia,serif; filter:drop-shadow(0 0 28px rgba(255,205,126,.18)); }
+.cinema-intro-line { width:0; height:1px; margin:26px auto 0; background:linear-gradient(90deg,transparent,#ffe0ab,transparent); transition:width 3.2s linear; }
+.cinema-intro.show .cinema-intro-line { width:min(420px,72vw); }
+
+.memory-lightbox {
+  position:fixed; inset:0; z-index:1080; display:grid; place-items:center; padding:clamp(18px,4vw,54px);
+  background:rgba(2,2,9,.92); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
+  opacity:0; visibility:hidden; pointer-events:none; transition:opacity .35s ease,visibility .35s ease;
+}
+.memory-lightbox.open { opacity:1; visibility:visible; pointer-events:auto; }
+.memory-lightbox-figure { width:min(1120px,88vw); margin:0; text-align:center; }
+.memory-lightbox-image { display:block; width:100%; max-height:78vh; object-fit:contain; border-radius:20px; box-shadow:0 35px 110px rgba(0,0,0,.68); }
+.memory-lightbox-caption { display:flex; justify-content:space-between; gap:18px; margin-top:16px; color:rgba(255,255,255,.72); font-size:12px; letter-spacing:.1em; }
+.memory-lightbox-close,.memory-lightbox-nav {
+  position:absolute; display:grid; place-items:center; border:1px solid rgba(255,255,255,.13); color:#fff;
+  background:rgba(255,255,255,.06); backdrop-filter:blur(14px); cursor:pointer; transition:background .25s,transform .25s;
+}
+.memory-lightbox-close:hover,.memory-lightbox-nav:hover { background:rgba(255,255,255,.13); transform:scale(1.05); }
+.memory-lightbox-close { top:22px; right:22px; width:44px; height:44px; border-radius:50%; font-size:20px; }
+.memory-lightbox-nav { top:50%; width:48px; height:70px; border-radius:18px; transform:translateY(-50%); font-size:24px; }
+.memory-lightbox-nav:hover { transform:translateY(-50%) scale(1.05); }
+.memory-lightbox-prev { left:22px; }.memory-lightbox-next { right:22px; }
+body.lightbox-open { overflow:hidden; }
+.memory-strip-photos figure { cursor:zoom-in; }
+.memory-strip-photos figure:focus-visible { outline:3px solid #d7b3ff; outline-offset:4px; }
+
 .end-credits {
   position:relative; z-index:2; max-width:none; min-height:84vh; display:flex; align-items:center; justify-content:center;
   padding:120px 24px; text-align:center; overflow:hidden;
@@ -1346,6 +1384,10 @@ body.film-started .film-guide { transform:translateY(-50%); opacity:1; }
   .cinema-meta { justify-content:center; }
   .credits-list { grid-template-columns:1fr; gap:8px; }
   .end-credits { min-height:72vh; padding:90px 22px; }
+  .memory-lightbox { padding:70px 12px 80px; }
+  .memory-lightbox-figure { width:100%; }
+  .memory-lightbox-nav { top:auto; bottom:18px; width:58px; height:44px; }
+  .memory-lightbox-prev { left:calc(50% - 68px); }.memory-lightbox-next { right:calc(50% - 68px); }
 }
 
 @media(prefers-reduced-motion:reduce){
@@ -1409,6 +1451,24 @@ body.film-started .film-guide { transform:translateY(-50%); opacity:1; }
 </aside>
 <div class="chapter-flash" id="chapterFlash" aria-live="polite" aria-hidden="true">
   <div class="chapter-flash-inner"><div class="chapter-flash-number" id="chapterFlashNumber"></div><div class="chapter-flash-title" id="chapterFlashTitle"></div><div class="chapter-flash-line"></div></div>
+</div>
+<div class="cinema-intro" id="cinemaIntro" aria-hidden="true">
+  <div class="cinema-intro-inner">
+    <div class="cinema-intro-kicker">A BIRTHDAY FILM FOR SIQI</div>
+    <div class="cinema-intro-title" id="cinemaIntroTitle">谨以此片，献给高思琪的二十四岁</div>
+    <div class="cinema-intro-subtitle" id="cinemaIntroSubtitle">关于相遇、陪伴、笑声与未完待续</div>
+    <div class="cinema-intro-count" id="cinemaIntroCount">3</div>
+    <div class="cinema-intro-line"></div>
+  </div>
+</div>
+<div class="memory-lightbox" id="memoryLightbox" role="dialog" aria-modal="true" aria-label="回忆照片全屏放映" aria-hidden="true">
+  <button class="memory-lightbox-close" id="memoryLightboxClose" type="button" aria-label="关闭照片">×</button>
+  <button class="memory-lightbox-nav memory-lightbox-prev" id="memoryLightboxPrev" type="button" aria-label="上一张照片">‹</button>
+  <figure class="memory-lightbox-figure">
+    <img class="memory-lightbox-image" id="memoryLightboxImage" alt="">
+    <figcaption class="memory-lightbox-caption"><span id="memoryLightboxTitle"></span><span id="memoryLightboxCounter"></span></figcaption>
+  </figure>
+  <button class="memory-lightbox-nav memory-lightbox-next" id="memoryLightboxNext" type="button" aria-label="下一张照片">›</button>
 </div>
 
 <!-- 导航 -->
@@ -2466,6 +2526,10 @@ document.addEventListener('click',e=>{
   const flash=document.getElementById('chapterFlash');
   const flashNumber=document.getElementById('chapterFlashNumber');
   const flashTitle=document.getElementById('chapterFlashTitle');
+  const intro=document.getElementById('cinemaIntro');
+  const introTitle=document.getElementById('cinemaIntroTitle');
+  const introSubtitle=document.getElementById('cinemaIntroSubtitle');
+  const introCount=document.getElementById('cinemaIntroCount');
   const guideLinks=Array.from(document.querySelectorAll('[data-film-chapter]'));
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const chapters=[
@@ -2479,6 +2543,31 @@ document.addEventListener('click',e=>{
   function startFilm(){
     document.body.classList.add('film-started','birthday-mode');
     dispatchEvent(new CustomEvent('birthday:activate'));
+  }
+
+  function runOpening(){
+    startFilm();
+    if(reduced){
+      document.getElementById('story').scrollIntoView();
+      return;
+    }
+    introTitle.textContent='谨以此片，献给高思琪的二十四岁';
+    introSubtitle.textContent='关于相遇、陪伴、笑声与未完待续';
+    introCount.textContent='3';
+    intro.classList.add('show');
+    intro.setAttribute('aria-hidden','false');
+    const steps=[
+      [760,'2'],[1460,'1'],
+      [2200,'生日快乐'],
+      [3000,'高思琪 · 24'],
+      [3850,'']
+    ];
+    steps.forEach(([delay,text])=>setTimeout(()=>{ introCount.textContent=text; },delay));
+    setTimeout(()=>{
+      intro.classList.remove('show');
+      intro.setAttribute('aria-hidden','true');
+      document.getElementById('story').scrollIntoView({behavior:'smooth'});
+    },4100);
   }
 
   function showChapter(chapter){
@@ -2507,11 +2596,72 @@ document.addEventListener('click',e=>{
     if(section) observer.observe(section);
   });
 
-  play.addEventListener('click',startFilm);
+  play.addEventListener('click',event=>{
+    event.preventDefault();
+    runOpening();
+  });
   replay.addEventListener('click',()=>{
     startFilm();
     scrollTo({top:0,behavior:reduced?'auto':'smooth'});
     setTimeout(()=>play.focus(),reduced?0:650);
+  });
+})();
+
+/* ================================================================
+   14. 我们的回忆 · 全屏照片放映
+   ================================================================ */
+(function(){
+  const items=Array.from(document.querySelectorAll('.memory-strip-photos figure'));
+  const lightbox=document.getElementById('memoryLightbox');
+  const image=document.getElementById('memoryLightboxImage');
+  const title=document.getElementById('memoryLightboxTitle');
+  const counter=document.getElementById('memoryLightboxCounter');
+  const closeButton=document.getElementById('memoryLightboxClose');
+  const previousButton=document.getElementById('memoryLightboxPrev');
+  const nextButton=document.getElementById('memoryLightboxNext');
+  let current=0,lastTrigger=null;
+
+  function render(){
+    const item=items[current],source=item.querySelector('img'),caption=item.querySelector('figcaption');
+    image.src=source.currentSrc||source.src;
+    image.alt=source.alt;
+    title.textContent=caption?caption.textContent:'我们的回忆';
+    counter.textContent=String(current+1).padStart(2,'0')+' / '+String(items.length).padStart(2,'0');
+  }
+  function open(index,trigger){
+    current=index;lastTrigger=trigger;render();
+    lightbox.classList.add('open');
+    lightbox.setAttribute('aria-hidden','false');
+    document.body.classList.add('lightbox-open');
+    closeButton.focus();
+  }
+  function close(){
+    lightbox.classList.remove('open');
+    lightbox.setAttribute('aria-hidden','true');
+    document.body.classList.remove('lightbox-open');
+    image.removeAttribute('src');
+    if(lastTrigger) lastTrigger.focus();
+  }
+  function move(direction){ current=(current+direction+items.length)%items.length;render(); }
+
+  items.forEach((item,index)=>{
+    item.tabIndex=0;
+    item.setAttribute('role','button');
+    item.setAttribute('aria-label','全屏查看'+(item.querySelector('figcaption')?.textContent||'第 '+(index+1)+' 张回忆'));
+    item.addEventListener('click',()=>open(index,item));
+    item.addEventListener('keydown',event=>{
+      if(event.key==='Enter'||event.key===' '){ event.preventDefault();open(index,item); }
+    });
+  });
+  closeButton.addEventListener('click',close);
+  previousButton.addEventListener('click',()=>move(-1));
+  nextButton.addEventListener('click',()=>move(1));
+  lightbox.addEventListener('click',event=>{ if(event.target===lightbox) close(); });
+  addEventListener('keydown',event=>{
+    if(!lightbox.classList.contains('open')) return;
+    if(event.key==='Escape') close();
+    if(event.key==='ArrowLeft') move(-1);
+    if(event.key==='ArrowRight') move(1);
   });
 })();
 
