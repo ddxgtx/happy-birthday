@@ -2454,7 +2454,14 @@ const Confetti=(function(){
     if(busy||wished) return;
     busy=true;
     finale.classList.add('candles-blown');
-    celebrate();
+    const r=cake.getBoundingClientRect();
+    fancyCelebration(r.left+r.width/2,r.top+r.height/2);
+    finaleHint.textContent='蜡烛已经吹灭，现在把愿望写下来吧';
+    wishCta.textContent='写下我的愿望';
+    setTimeout(()=>{
+      busy=false;
+      openWish();
+    },1800);
   });
   cake.addEventListener('click',requestWishOrBlow);
   wishCta.addEventListener('click',requestWishOrBlow);
@@ -2670,7 +2677,7 @@ document.addEventListener('click',e=>{
     clearTimeout(readyTimer);
     finale.classList.remove('candles-ready');
     finale.classList.add('candles-blown');
-    status.textContent='蜡烛已经吹灭 · 愿望正在飞向星河';
+    status.textContent='蜡烛已经吹灭 · 现在写下你的生日愿望';
   });
 })();
 
@@ -2741,8 +2748,8 @@ document.addEventListener('click',e=>{
     document.body.classList.add('auto-film-playing');
     chapters.forEach((chapter,index)=>later(()=>{
       document.getElementById(chapter.id).scrollIntoView({behavior:'smooth',block:'start'});
-    },index*2050));
-    later(finishAtWish,chapters.length*2050+450);
+    },index*3200));
+    later(finishAtWish,chapters.length*3200+700);
   }
 
   function runMontage(){
@@ -2759,7 +2766,7 @@ document.addEventListener('click',e=>{
       void montageImage.offsetWidth;
       montageImage.classList.add('flash');
       index+=1;
-      later(next,620);
+      later(next,1250);
     }
     next();
   }
@@ -2778,10 +2785,10 @@ document.addEventListener('click',e=>{
     intro.classList.add('show');
     intro.setAttribute('aria-hidden','false');
     const steps=[
-      [760,'2'],[1460,'1'],
-      [2200,'生日快乐'],
-      [3000,'高思琪 · 24'],
-      [3850,'']
+      [900,'2'],[1800,'1'],
+      [2800,'生日快乐'],
+      [3900,'高思琪 · 24'],
+      [5000,'']
     ];
     steps.forEach(([delay,text])=>later(()=>{ introCount.textContent=text; },delay));
     later(()=>{
@@ -2790,7 +2797,7 @@ document.addEventListener('click',e=>{
         clearSequence();
         document.getElementById('story').scrollIntoView({behavior:'smooth'});
       }
-    },4100);
+    },5300);
   }
 
   function showChapter(chapter){
