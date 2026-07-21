@@ -1338,6 +1338,19 @@ body.film-started .film-guide { transform:translateY(-50%); opacity:1; }
 .cinema-intro-count { min-height:110px; margin-top:28px; color:#ffe0ab; font:800 clamp(72px,15vw,132px)/.85 Georgia,serif; filter:drop-shadow(0 0 28px rgba(255,205,126,.18)); }
 .cinema-intro-line { width:0; height:1px; margin:26px auto 0; background:linear-gradient(90deg,transparent,#ffe0ab,transparent); transition:width 3.2s linear; }
 .cinema-intro.show .cinema-intro-line { width:min(420px,72vw); }
+.cinema-intro-title,.cinema-intro-subtitle,.cinema-intro-count,.cinema-intro-kicker,.cinema-intro-line { transition:opacity .28s ease,transform .45s var(--ease); }
+.cinema-montage { position:absolute; inset:6%; display:grid; place-items:center; opacity:0; visibility:hidden; transition:opacity .3s,visibility .3s; }
+.cinema-montage-frame { position:relative; width:min(1120px,88vw); height:min(72vh,720px); overflow:hidden; border-radius:24px; background:#080811; box-shadow:0 36px 120px rgba(0,0,0,.78); }
+.cinema-montage-image { width:100%; height:100%; object-fit:contain; opacity:0; transform:scale(1.035); filter:saturate(.88) contrast(1.04); }
+.cinema-montage-image.flash { animation:montageFlash .64s ease both; }
+@keyframes montageFlash { 0%{opacity:0;filter:brightness(1.8) blur(7px)} 16%{opacity:1;filter:brightness(1.22) blur(0)} 82%{opacity:1} 100%{opacity:0;transform:scale(1)} }
+.cinema-montage-caption { position:absolute; left:24px; bottom:20px; color:#fff; font-size:12px; font-weight:750; letter-spacing:.14em; text-shadow:0 2px 12px #000; }
+.cinema-montage-counter { position:absolute; right:24px; bottom:20px; color:rgba(255,255,255,.6); font-size:10px; letter-spacing:.16em; }
+.cinema-intro.montage .cinema-intro-kicker,.cinema-intro.montage .cinema-intro-title,.cinema-intro.montage .cinema-intro-subtitle,.cinema-intro.montage .cinema-intro-count,.cinema-intro.montage .cinema-intro-line { opacity:0; transform:translateY(-12px); }
+.cinema-intro.montage .cinema-montage { opacity:1; visibility:visible; }
+.cinema-skip { position:absolute; right:26px; bottom:24px; z-index:2; padding:9px 15px; border:1px solid rgba(255,255,255,.14); border-radius:999px; color:rgba(255,255,255,.7); background:rgba(255,255,255,.05); font:700 10px inherit; letter-spacing:.12em; cursor:pointer; }
+.cinema-skip:hover { color:#fff; background:rgba(255,255,255,.11); }
+body.auto-film-playing { scroll-behavior:smooth; }
 
 .memory-lightbox {
   position:fixed; inset:0; z-index:1080; display:grid; place-items:center; padding:clamp(18px,4vw,54px);
@@ -1388,6 +1401,11 @@ body.lightbox-open { overflow:hidden; }
   .memory-lightbox-figure { width:100%; }
   .memory-lightbox-nav { top:auto; bottom:18px; width:58px; height:44px; }
   .memory-lightbox-prev { left:calc(50% - 68px); }.memory-lightbox-next { right:calc(50% - 68px); }
+  .cinema-montage { inset:10% 10px 14%; }
+  .cinema-montage-frame { width:100%; height:64vh; border-radius:18px; }
+  .cinema-montage-caption { left:14px; bottom:14px; font-size:10px; }
+  .cinema-montage-counter { right:14px; bottom:14px; }
+  .cinema-skip { right:14px; bottom:14px; }
 }
 
 @media(prefers-reduced-motion:reduce){
@@ -1459,7 +1477,15 @@ body.lightbox-open { overflow:hidden; }
     <div class="cinema-intro-subtitle" id="cinemaIntroSubtitle">关于相遇、陪伴、笑声与未完待续</div>
     <div class="cinema-intro-count" id="cinemaIntroCount">3</div>
     <div class="cinema-intro-line"></div>
+    <div class="cinema-montage" id="cinemaMontage" aria-live="polite">
+      <div class="cinema-montage-frame">
+        <img class="cinema-montage-image" id="cinemaMontageImage" alt="生日回忆闪回">
+        <div class="cinema-montage-caption" id="cinemaMontageCaption"></div>
+        <div class="cinema-montage-counter" id="cinemaMontageCounter"></div>
+      </div>
+    </div>
   </div>
+  <button class="cinema-skip" id="cinemaSkip" type="button">跳过片头 · 直接许愿</button>
 </div>
 <div class="memory-lightbox" id="memoryLightbox" role="dialog" aria-modal="true" aria-label="回忆照片全屏放映" aria-hidden="true">
   <button class="memory-lightbox-close" id="memoryLightboxClose" type="button" aria-label="关闭照片">×</button>
@@ -2054,6 +2080,7 @@ body.lightbox-open { overflow:hidden; }
     if(enter.disabled) return;
     gate.classList.add('hidden');
     setTimeout(()=>gate.remove(),600);
+    setTimeout(()=>dispatchEvent(new CustomEvent('birthday:autoplay')),650);
   });
 
   function updateMusicUI(){
@@ -2530,6 +2557,12 @@ document.addEventListener('click',e=>{
   const introTitle=document.getElementById('cinemaIntroTitle');
   const introSubtitle=document.getElementById('cinemaIntroSubtitle');
   const introCount=document.getElementById('cinemaIntroCount');
+  const montage=document.getElementById('cinemaMontage');
+  const montageImage=document.getElementById('cinemaMontageImage');
+  const montageCaption=document.getElementById('cinemaMontageCaption');
+  const montageCounter=document.getElementById('cinemaMontageCounter');
+  const skip=document.getElementById('cinemaSkip');
+  const wishCta=document.getElementById('wishCta');
   const guideLinks=Array.from(document.querySelectorAll('[data-film-chapter]'));
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const chapters=[
@@ -2538,17 +2571,75 @@ document.addEventListener('click',e=>{
     {id:'gallery',number:'CHAPTER 03',title:'快乐放映厅'},
     {id:'finale',number:'CHAPTER 04',title:'把愿望交给星河'}
   ];
-  let active='',flashTimer=0;
+  const memories=[
+    ['assets/photos/movie-01.webp','01 · 同窗初见'],
+    ['assets/photos/movie-02.webp','02 · 开心相聚'],
+    ['assets/photos/movie-03.webp','03 · 毕业时刻'],
+    ['assets/photos/movie-04.webp','04 · 烟花之夜'],
+    ['assets/photos/movie-05.webp','05 · 青春留影'],
+    ['assets/photos/movie-06.webp','06 · 欢乐瞬间'],
+    ['assets/photos/movie-07.webp','07 · 未完待续']
+  ];
+  memories.forEach(([src])=>{ const preload=new Image();preload.src=src; });
+  let active='',flashTimer=0,sequenceTimers=[],sequenceRunning=false;
+
+  function later(callback,delay){
+    const timer=setTimeout(callback,delay);sequenceTimers.push(timer);return timer;
+  }
+  function clearSequence(){
+    sequenceTimers.forEach(clearTimeout);sequenceTimers=[];sequenceRunning=false;
+    intro.classList.remove('show','montage');
+    intro.setAttribute('aria-hidden','true');
+    document.body.classList.remove('auto-film-playing');
+  }
 
   function startFilm(){
     document.body.classList.add('film-started','birthday-mode');
     dispatchEvent(new CustomEvent('birthday:activate'));
   }
 
-  function runOpening(){
+  function finishAtWish(){
+    clearSequence();
+    startFilm();
+    document.getElementById('finale').scrollIntoView({behavior:reduced?'auto':'smooth'});
+    setTimeout(()=>wishCta.click(),reduced?80:850);
+  }
+
+  function playJourney(){
+    intro.classList.remove('show','montage');
+    intro.setAttribute('aria-hidden','true');
+    document.body.classList.add('auto-film-playing');
+    chapters.forEach((chapter,index)=>later(()=>{
+      document.getElementById(chapter.id).scrollIntoView({behavior:'smooth',block:'start'});
+    },index*2050));
+    later(finishAtWish,chapters.length*2050+450);
+  }
+
+  function runMontage(){
+    intro.classList.add('montage');
+    let index=0;
+    function next(){
+      if(index>=memories.length){ later(playJourney,380);return; }
+      const [src,caption]=memories[index];
+      montageImage.classList.remove('flash');
+      montageImage.src=src;
+      montageImage.alt=caption;
+      montageCaption.textContent=caption;
+      montageCounter.textContent=String(index+1).padStart(2,'0')+' / '+String(memories.length).padStart(2,'0');
+      void montageImage.offsetWidth;
+      montageImage.classList.add('flash');
+      index+=1;
+      later(next,620);
+    }
+    next();
+  }
+
+  function runOpening(autoJourney=true){
+    if(sequenceRunning) return;
+    sequenceRunning=true;
     startFilm();
     if(reduced){
-      document.getElementById('story').scrollIntoView();
+      if(autoJourney) finishAtWish(); else document.getElementById('story').scrollIntoView();
       return;
     }
     introTitle.textContent='谨以此片，献给高思琪的二十四岁';
@@ -2562,11 +2653,13 @@ document.addEventListener('click',e=>{
       [3000,'高思琪 · 24'],
       [3850,'']
     ];
-    steps.forEach(([delay,text])=>setTimeout(()=>{ introCount.textContent=text; },delay));
-    setTimeout(()=>{
-      intro.classList.remove('show');
-      intro.setAttribute('aria-hidden','true');
-      document.getElementById('story').scrollIntoView({behavior:'smooth'});
+    steps.forEach(([delay,text])=>later(()=>{ introCount.textContent=text; },delay));
+    later(()=>{
+      if(autoJourney) runMontage();
+      else{
+        clearSequence();
+        document.getElementById('story').scrollIntoView({behavior:'smooth'});
+      }
     },4100);
   }
 
@@ -2598,9 +2691,12 @@ document.addEventListener('click',e=>{
 
   play.addEventListener('click',event=>{
     event.preventDefault();
-    runOpening();
+    runOpening(true);
   });
+  addEventListener('birthday:autoplay',()=>runOpening(true));
+  skip.addEventListener('click',finishAtWish);
   replay.addEventListener('click',()=>{
+    clearSequence();
     startFilm();
     scrollTo({top:0,behavior:reduced?'auto':'smooth'});
     setTimeout(()=>play.focus(),reduced?0:650);
