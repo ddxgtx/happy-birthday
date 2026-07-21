@@ -1233,6 +1233,14 @@ section:not(#hero)::before { background:linear-gradient(90deg,transparent,rgba(1
 }
 #finale.candles-ready .ritual-status { opacity:1; transform:translateX(-50%); }
 #finale.candles-ready .cake { cursor:pointer; filter:drop-shadow(0 34px 70px rgba(255,199,102,.34)); animation:cakeReadyPulse 2s ease-in-out infinite; }
+#finale.candles-ready .finale-hint {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 16px;
+  border:1px solid rgba(255,220,145,.42); border-radius:999px; color:#fff4d4;
+  background:rgba(37,22,55,.78); box-shadow:0 10px 36px rgba(206,126,255,.2),0 0 24px rgba(255,213,122,.12);
+  animation:tapCakeHint 1.35s ease-in-out infinite;
+}
+#finale.candles-ready .finale-hint::before { content:"☝"; font-size:18px; }
+@keyframes tapCakeHint { 50% { transform:translateY(-4px) scale(1.035); box-shadow:0 14px 44px rgba(206,126,255,.3),0 0 34px rgba(255,213,122,.2); } }
 #finale.wished .star-birthday-message,
 #finale.wished .candle-rack,
 #finale.wished .ritual-status { opacity:0; pointer-events:none; transition:opacity .65s ease; }
@@ -1266,21 +1274,30 @@ section:not(#hero)::before { background:linear-gradient(90deg,transparent,rgba(1
   .cake-stage { min-height:520px; margin-top:-30px; }
 }
 @media(max-width:600px){
-  #finale { padding:96px 16px 64px; }
+  #finale { min-height:100svh; padding:82px 14px max(58px,env(safe-area-inset-bottom)); overflow:hidden; }
   #finale::before { inset:4% 10px 2%; border-radius:30px; }
+  .finale-stage { width:100%; gap:14px; }
+  .finale-copy { padding-inline:4px; }
   .finale-title { font-size:clamp(38px,12vw,54px); }
   .finale-lead { font-size:14px; }
   .wish-step { font-size:12px; }
-  .cake-stage { min-height:390px; margin-top:-18px; }
-  .cake { width:min(390px,110%); }
+  .cake-stage { width:100%; min-height:410px; margin-top:-10px; }
+  .cake { width:min(350px,94vw); min-height:44px; touch-action:manipulation; }
   .cake-caption { bottom:4%; }
-  .wish-card { padding:28px 20px 24px; }
+  #finale.candles-ready .finale-hint { max-width:calc(100vw - 48px); padding:10px 14px; font-size:12px; line-height:1.45; }
+  .wish-dialog { align-items:end; padding:12px 10px max(12px,env(safe-area-inset-bottom)); }
+  .wish-card { width:100%; max-height:calc(100svh - 24px); padding:24px 18px 20px; overflow:auto; border-radius:26px; }
+  .wish-card h3 { font-size:28px; }
+  .wish-card p { font-size:13px; line-height:1.65; }
+  .wish-input { min-height:48px; font-size:16px; }
   .wish-actions { flex-direction:column-reverse; }
-  .wish-actions button { width:100%; }
+  .wish-actions button { width:100%; min-height:48px; touch-action:manipulation; }
   .star-birthday-message { top:8%; }
-  .star-birthday-message strong { font-size:48px; }
-  .candle-rack { bottom:8%; grid-template-columns:repeat(8,1fr); gap:7px 5px; }
-  .ritual-status { bottom:2.2%; font-size:9px; letter-spacing:.08em; }
+  .star-birthday-message strong { font-size:clamp(42px,14vw,56px); }
+  .star-birthday-message span { padding-inline:18px; font-size:8px; letter-spacing:.2em; }
+  .candle-rack { bottom:9%; width:calc(100vw - 34px); grid-template-columns:repeat(8,1fr); gap:6px 4px; }
+  .ritual-candle { height:30px; }
+  .ritual-status { bottom:2.2%; width:calc(100vw - 40px); font-size:9px; line-height:1.5; letter-spacing:.06em; white-space:normal; }
 }
 
 @media(max-width:860px){
@@ -1396,7 +1413,7 @@ body.film-started .film-guide { transform:translateY(-50%); opacity:1; }
 .cinema-montage { position:absolute; inset:6%; display:grid; place-items:center; opacity:0; visibility:hidden; transition:opacity .3s,visibility .3s; }
 .cinema-montage-frame { position:relative; width:min(1120px,88vw); height:min(72vh,720px); overflow:hidden; border-radius:24px; background:#080811; box-shadow:0 36px 120px rgba(0,0,0,.78); }
 .cinema-montage-image { width:100%; height:100%; object-fit:contain; opacity:0; transform:scale(1.035); filter:saturate(.88) contrast(1.04); }
-.cinema-montage-image.flash { animation:montageFlash .64s ease both; }
+.cinema-montage-image.flash { animation:montageFlash 2.5s ease both; }
 @keyframes montageFlash { 0%{opacity:0;filter:brightness(1.8) blur(7px)} 16%{opacity:1;filter:brightness(1.22) blur(0)} 82%{opacity:1} 100%{opacity:0;transform:scale(1)} }
 .cinema-montage-caption { position:absolute; left:24px; bottom:20px; color:#fff; font-size:12px; font-weight:750; letter-spacing:.14em; text-shadow:0 2px 12px #000; }
 .cinema-montage-counter { position:absolute; right:24px; bottom:20px; color:rgba(255,255,255,.6); font-size:10px; letter-spacing:.16em; }
@@ -1456,7 +1473,8 @@ body.lightbox-open { overflow:hidden; }
   .memory-lightbox-nav { top:auto; bottom:18px; width:58px; height:44px; }
   .memory-lightbox-prev { left:calc(50% - 68px); }.memory-lightbox-next { right:calc(50% - 68px); }
   .cinema-montage { inset:10% 10px 14%; }
-  .cinema-montage-frame { width:100%; height:64vh; border-radius:18px; }
+  .cinema-montage-frame { width:100%; height:62svh; border-radius:18px; }
+  .cinema-montage-image { object-fit:contain; }
   .cinema-montage-caption { left:14px; bottom:14px; font-size:10px; }
   .cinema-montage-counter { right:14px; bottom:14px; }
   .cinema-skip { right:14px; bottom:14px; }
@@ -1740,7 +1758,7 @@ body.lightbox-open { overflow:hidden; }
       <img class="cat-mascot cat-finale" src="assets/backgrounds/cat-star-mascot.png" alt="陪你许愿的小猫" loading="lazy" decoding="async">
       <button class="cake" id="cake" type="button" aria-label="点击二十四岁生日蛋糕许愿">
         <img id="cakeImage" src="assets/backgrounds/birthday-cake-24.png" alt="点燃数字 24 蜡烛的生日蛋糕">
-        <span class="cake-caption">SIQI · 24TH BIRTHDAY</span>
+        <span class="cake-caption" id="cakeCaption">SIQI · 24TH BIRTHDAY</span>
       </button>
       <div>
         <div class="finale-text">生日快乐，高思琪</div>
@@ -2162,6 +2180,7 @@ body.lightbox-open { overflow:hidden; }
   }
 
   addEventListener('birthday:wish-start',playBirthdayLoop);
+  addEventListener('birthday:blow-candles',playBirthdayLoop);
   toggle.addEventListener('click',()=>{
     wishStarted=true;
     if(audio.paused) playBirthdayLoop(); else audio.pause();
@@ -2633,6 +2652,8 @@ document.addEventListener('click',e=>{
   const rack=document.getElementById('candleRack');
   const status=document.getElementById('ritualStatus');
   const finaleHint=document.getElementById('finaleHint');
+  const wishCta=document.getElementById('wishCta');
+  const cakeCaption=document.getElementById('cakeCaption');
   let activated=false,readyTimer=0;
 
   for(let i=0;i<112;i++){
@@ -2664,6 +2685,7 @@ document.addEventListener('click',e=>{
       finale.classList.add('candles-ready');
       status.textContent='24 根蜡烛已经点亮 · 点击蛋糕吹灭蜡烛';
       finaleHint.textContent='轻轻点击蛋糕，吹灭蜡烛，把愿望交给星河';
+      cakeCaption.textContent='点击蛋糕 · 吹灭蜡烛';
       wishCta.textContent='吹灭 24 根蜡烛';
     },4450);
   }
@@ -2678,6 +2700,7 @@ document.addEventListener('click',e=>{
     finale.classList.remove('candles-ready');
     finale.classList.add('candles-blown');
     status.textContent='蜡烛已经吹灭 · 现在写下你的生日愿望';
+    cakeCaption.textContent='蜡烛熄灭 · 写下愿望';
   });
 })();
 
@@ -2766,7 +2789,7 @@ document.addEventListener('click',e=>{
       void montageImage.offsetWidth;
       montageImage.classList.add('flash');
       index+=1;
-      later(next,1250);
+      later(next,2500);
     }
     next();
   }
