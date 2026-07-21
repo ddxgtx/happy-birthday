@@ -1189,6 +1189,52 @@ section:not(#hero)::before { background:linear-gradient(90deg,transparent,rgba(1
 #finale.wished .cake-stage::before { opacity:.48; animation:none; }
 #finale.wished .wish-step { border-color:rgba(255,207,117,.14); }
 
+.finale-ritual { position:absolute; inset:0; z-index:5; pointer-events:none; overflow:hidden; }
+.star-convergence { position:absolute; inset:0; }
+.star-convergence i {
+  position:absolute; left:50%; top:20%; width:4px; height:4px; border-radius:50%; background:#fff;
+  opacity:0; box-shadow:0 0 10px #fff,0 0 18px #c9a5ff; transform:translate(var(--sx),var(--sy)) scale(.35);
+}
+#finale.ritual-active .star-convergence i { animation:starConverge 1.75s var(--ease) var(--delay) both; }
+@keyframes starConverge {
+  0% { opacity:0; transform:translate(var(--sx),var(--sy)) scale(.3); }
+  26% { opacity:1; }
+  78% { opacity:.95; transform:translate(var(--tx),var(--ty)) scale(1.25); }
+  100% { opacity:0; transform:translate(var(--tx),var(--ty)) scale(.2); }
+}
+.star-birthday-message {
+  position:absolute; left:50%; top:12%; width:min(760px,92vw); transform:translate(-50%,24px) scale(.92);
+  text-align:center; opacity:0; filter:blur(12px); transition:opacity .9s 1.3s,transform 1.15s var(--ease) 1.25s,filter 1.1s 1.25s;
+}
+#finale.ritual-active .star-birthday-message { opacity:1; transform:translate(-50%,0) scale(1); filter:blur(0); }
+.star-birthday-message strong {
+  display:block; color:#fff; font-size:clamp(44px,8vw,104px); font-weight:850; line-height:.95; letter-spacing:-.05em;
+  text-shadow:0 0 10px rgba(255,255,255,.8),0 0 28px rgba(207,167,255,.75),0 0 74px rgba(145,92,255,.5);
+}
+.star-birthday-message span { display:block; margin-top:15px; color:#f4d9a6; font-size:10px; font-weight:800; letter-spacing:.34em; }
+.candle-rack {
+  position:absolute; left:50%; bottom:7%; width:min(620px,88vw); display:grid; grid-template-columns:repeat(12,1fr); gap:12px 8px;
+  transform:translateX(-50%); pointer-events:none;
+}
+.ritual-candle { position:relative; height:34px; opacity:0; transform:translateY(12px) scale(.8); }
+.ritual-candle::after { content:""; position:absolute; left:50%; bottom:0; width:5px; height:22px; transform:translateX(-50%); border-radius:3px; background:linear-gradient(90deg,#f3b5df,#fff1c6,#bb8cff); box-shadow:0 0 8px rgba(223,167,255,.28); }
+.ritual-flame { position:absolute; left:50%; top:-4px; z-index:2; width:8px; height:13px; transform:translateX(-50%) rotate(5deg); border-radius:60% 40% 55% 45%; background:linear-gradient(#fff,#ffd36e 42%,#ff8f2d); box-shadow:0 0 12px #ffd36e,0 0 24px rgba(255,139,45,.72); opacity:0; }
+#finale.ritual-active .ritual-candle { animation:candleRise .42s var(--ease) var(--delay) forwards; }
+#finale.ritual-active .ritual-flame { animation:flameLight .35s ease var(--delay) forwards,flameDance 1.15s ease-in-out calc(var(--delay) + .35s) infinite alternate; }
+@keyframes candleRise { to { opacity:1; transform:none; } }
+@keyframes flameLight { from{opacity:0;transform:translateX(-50%) translateY(7px) scale(.2)} to{opacity:1;transform:translateX(-50%) rotate(5deg) scale(1)} }
+@keyframes flameDance { to { transform:translateX(-50%) rotate(-7deg) scale(.88,1.08); filter:brightness(1.2); } }
+#finale.candles-blown .ritual-flame { animation:flameOut .48s ease forwards!important; }
+@keyframes flameOut { to { opacity:0; transform:translateX(-50%) translateY(-16px) scale(.15); filter:blur(5px); } }
+.ritual-status {
+  position:absolute; left:50%; bottom:2.5%; transform:translateX(-50%) translateY(12px); opacity:0;
+  color:rgba(255,241,206,.86); font-size:11px; font-weight:750; letter-spacing:.13em; white-space:nowrap;
+  transition:opacity .5s,transform .5s var(--ease);
+}
+#finale.candles-ready .ritual-status { opacity:1; transform:translateX(-50%); }
+#finale.candles-ready .cake { cursor:pointer; filter:drop-shadow(0 34px 70px rgba(255,199,102,.34)); animation:cakeReadyPulse 2s ease-in-out infinite; }
+@keyframes cakeReadyPulse { 50% { transform:scale(1.025); filter:drop-shadow(0 40px 85px rgba(255,199,102,.48)); } }
+
 .wish-dialog { background:rgba(4,2,13,.82); }
 .wish-card { width:min(520px,94vw); padding:32px 34px 30px; }
 .wish-card-top { position:relative; z-index:2; display:flex; align-items:center; justify-content:center; gap:14px; }
@@ -1227,6 +1273,10 @@ section:not(#hero)::before { background:linear-gradient(90deg,transparent,rgba(1
   .wish-card { padding:28px 20px 24px; }
   .wish-actions { flex-direction:column-reverse; }
   .wish-actions button { width:100%; }
+  .star-birthday-message { top:8%; }
+  .star-birthday-message strong { font-size:48px; }
+  .candle-rack { bottom:8%; grid-template-columns:repeat(8,1fr); gap:7px 5px; }
+  .ritual-status { bottom:2.2%; font-size:9px; letter-spacing:.08em; }
 }
 
 @media(max-width:860px){
@@ -1664,6 +1714,12 @@ body.lightbox-open { overflow:hidden; }
 <!-- ═══════════ 结尾 ═══════════ -->
 <section id="finale">
   <div class="finale-signature" aria-hidden="true">24</div>
+  <div class="finale-ritual" id="finaleRitual" aria-live="polite">
+    <div class="star-convergence" id="starConvergence" aria-hidden="true"></div>
+    <div class="star-birthday-message"><strong>生日快乐</strong><span>HAPPY 24TH BIRTHDAY · SIQI</span></div>
+    <div class="candle-rack" id="candleRack" aria-label="二十四根生日蜡烛"></div>
+    <div class="ritual-status" id="ritualStatus">24 根蜡烛已经点亮 · 点击蛋糕吹灭蜡烛</div>
+  </div>
   <div class="finale-stage">
     <div class="finale-copy">
       <div class="finale-kicker">FINAL CHAPTER · MAKE A WISH</div>
@@ -2383,8 +2439,21 @@ const Confetti=(function(){
     confirmWish.disabled=false; cancelWish.disabled=false; wishInput.disabled=false;
     wishInput.value='';
   }
-  cake.addEventListener('click',openWish);
-  wishCta.addEventListener('click',openWish);
+  function requestWishOrBlow(){
+    if(finale.classList.contains('candles-ready')){
+      dispatchEvent(new CustomEvent('birthday:blow-candles'));
+      return;
+    }
+    openWish();
+  }
+  addEventListener('birthday:blow-candles',()=>{
+    if(busy||wished) return;
+    busy=true;
+    finale.classList.add('candles-blown');
+    celebrate();
+  });
+  cake.addEventListener('click',requestWishOrBlow);
+  wishCta.addEventListener('click',requestWishOrBlow);
   confirmWish.addEventListener('click',beginWishCountdown);
   cancelWish.addEventListener('click',closeWish);
   dialog.addEventListener('click',e=>{if(e.target===dialog)closeWish();});
@@ -2545,7 +2614,64 @@ document.addEventListener('click',e=>{
 })();
 
 /* ================================================================
-   13. 沉浸式生日电影章节
+   13. 结尾生日仪式 · 星空汇聚与二十四根蜡烛
+   ================================================================ */
+(function(){
+  const finale=document.getElementById('finale');
+  const stars=document.getElementById('starConvergence');
+  const rack=document.getElementById('candleRack');
+  const status=document.getElementById('ritualStatus');
+  const finaleHint=document.getElementById('finaleHint');
+  let activated=false,readyTimer=0;
+
+  for(let i=0;i<112;i++){
+    const star=document.createElement('i');
+    const angle=Math.random()*Math.PI*2;
+    const distance=180+Math.random()*Math.max(innerWidth,innerHeight)*.58;
+    star.style.setProperty('--sx',Math.cos(angle)*distance+'px');
+    star.style.setProperty('--sy',Math.sin(angle)*distance+'px');
+    star.style.setProperty('--tx',(Math.random()-.5)*Math.min(620,innerWidth*.72)+'px');
+    star.style.setProperty('--ty',((Math.random()-.5)*76)+'px');
+    star.style.setProperty('--delay',(Math.random()*.72)+'s');
+    stars.appendChild(star);
+  }
+  for(let i=0;i<24;i++){
+    const candle=document.createElement('span');
+    candle.className='ritual-candle';
+    candle.style.setProperty('--delay',(1.5+i*.105)+'s');
+    candle.innerHTML='<i class="ritual-flame"></i>';
+    rack.appendChild(candle);
+  }
+
+  function activate(){
+    if(activated||finale.classList.contains('wished')) return;
+    activated=true;
+    finale.classList.add('ritual-active');
+    status.textContent='星光正在汇聚 · 24 根蜡烛依次点亮';
+    finaleHint.textContent='等待二十四根蜡烛全部亮起';
+    readyTimer=setTimeout(()=>{
+      finale.classList.add('candles-ready');
+      status.textContent='24 根蜡烛已经点亮 · 点击蛋糕吹灭蜡烛';
+      finaleHint.textContent='轻轻点击蛋糕，吹灭蜡烛，把愿望交给星河';
+      wishCta.textContent='吹灭 24 根蜡烛';
+    },4450);
+  }
+
+  const observer=new IntersectionObserver(entries=>{
+    if(entries.some(entry=>entry.isIntersecting)) activate();
+  },{threshold:.28});
+  observer.observe(finale);
+  addEventListener('birthday:finale-arrival',activate);
+  addEventListener('birthday:blow-candles',()=>{
+    clearTimeout(readyTimer);
+    finale.classList.remove('candles-ready');
+    finale.classList.add('candles-blown');
+    status.textContent='蜡烛已经吹灭 · 愿望正在飞向星河';
+  });
+})();
+
+/* ================================================================
+   14. 沉浸式生日电影章节
    ================================================================ */
 (function(){
   const play=document.getElementById('playBirthdayFilm');
@@ -2602,7 +2728,7 @@ document.addEventListener('click',e=>{
     clearSequence();
     startFilm();
     document.getElementById('finale').scrollIntoView({behavior:reduced?'auto':'smooth'});
-    setTimeout(()=>wishCta.click(),reduced?80:850);
+    setTimeout(()=>dispatchEvent(new CustomEvent('birthday:finale-arrival')),reduced?80:850);
   }
 
   function playJourney(){
@@ -2704,7 +2830,7 @@ document.addEventListener('click',e=>{
 })();
 
 /* ================================================================
-   14. 我们的回忆 · 全屏照片放映
+   15. 我们的回忆 · 全屏照片放映
    ================================================================ */
 (function(){
   const items=Array.from(document.querySelectorAll('.memory-strip-photos figure'));
