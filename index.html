@@ -954,6 +954,9 @@ body::before {
 }
 .gate-time span { margin-top:7px; color:rgba(255,255,255,.4); font-size:10px; letter-spacing:.16em; }
 .gate-target { min-height:20px; color:rgba(255,255,255,.48); font-size:11px; }
+.gate-loading { width:min(360px,100%); height:5px; margin:14px auto 8px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.08); }
+.gate-loading span { display:block; width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,#7d63ff,#d466e8,#ffd083); box-shadow:0 0 16px rgba(212,102,232,.45); transition:width .3s ease; }
+.gate-loading-text { min-height:18px; color:rgba(255,255,255,.52); font-size:10px; letter-spacing:.06em; }
 .gate-lock {
   display:inline-flex; margin:15px auto 17px; padding:7px 12px; border:1px solid rgba(255,193,120,.14);
   border-radius:999px; color:#e8c797; background:rgba(255,183,92,.05); font-size:9px; font-weight:750; letter-spacing:.12em;
@@ -1500,6 +1503,8 @@ body.lightbox-open { overflow:hidden; }
       <div class="gate-time"><strong id="gateSeconds">00</strong><span>秒</span></div>
     </div>
     <div class="gate-target" id="gateTarget">正在计算下一次农历六月十四…</div>
+    <div class="gate-loading" aria-hidden="true"><span id="gateLoadBar"></span></div>
+    <div class="gate-loading-text" id="gateLoadText" role="status" aria-live="polite">正在准备生日电影 · 0%</div>
     <div class="gate-lock" id="gateLock">BIRTHDAY LOCK · 生日当天才能开启</div>
     <button type="button" id="enterSite" disabled aria-disabled="true">生日当天才能开启</button>
   </div>
@@ -2095,8 +2100,9 @@ body.lightbox-open { overflow:hidden; }
   const title=card.querySelector('h2'),intro=document.getElementById('gateIntro'),targetEl=document.getElementById('gateTarget');
   const lock=document.getElementById('gateLock'),dEl=document.getElementById('gateDays'),hEl=document.getElementById('gateHours');
   const mEl=document.getElementById('gateMinutes'),sEl=document.getElementById('gateSeconds');
+  const loadBar=document.getElementById('gateLoadBar'),loadText=document.getElementById('gateLoadText');
   const testMode=/\/test\/?$/.test(location.pathname)||new URLSearchParams(location.search).get('test')==='1';
-  let formatter=null;
+  let formatter=null,assetsReady=false,loadProgress=0;
   try{ formatter=new Intl.DateTimeFormat('zh-CN-u-ca-chinese',{month:'long',day:'numeric'}); }catch(error){}
   function pad(n){ return String(n).padStart(2,'0'); }
   function isBirthday(date){
@@ -2113,18 +2119,56 @@ body.lightbox-open { overflow:hidden; }
     return fallback>now?fallback:new Date(2027,6,17,0,0,0);
   }
   function formatDate(date){ return date.getFullYear()+' 年 '+(date.getMonth()+1)+' 月 '+date.getDate()+' 日'; }
+  function collectLocalAssets(){
+    const matches=document.documentElement.innerHTML.matchAll(/assets\/[^"'()\s<>]+?\.(?:png|jpe?g|webp|gif|svg)/gi);
+    return [...new Set([...matches].map(match=>match[0]))];
+  }
+  function loadAsset(src){
+    return new Promise(resolve=>{
+      let attempts=0;
+      const start=()=>{
+        const img=new Image();
+        img.onload=async()=>{
+          try{ await img.decode(); }catch(error){}
+          resolve();
+        };
+        img.onerror=()=>{ attempts+=1; setTimeout(start,Math.min(4000,600*attempts)); };
+        img.src=src;
+      };
+      start();
+    });
+  }
+  async function preloadAllAssets(){
+    const assets=collectLocalAssets();
+    if(!assets.length){ assetsReady=true; loadProgress=100; tick(); return; }
+    let completed=0,cursor=0;
+    const worker=async()=>{
+      while(cursor<assets.length){
+        const src=assets[cursor++];
+        await loadAsset(src);
+        completed+=1;
+        loadProgress=Math.round(completed/assets.length*100);
+        loadBar.style.width=loadProgress+'%';
+        loadText.textContent=loadProgress<100?'正在准备生日电影 · '+loadProgress+'%':'全部素材已准备好';
+        tick();
+      }
+    };
+    await Promise.all(Array.from({length:Math.min(6,assets.length)},worker));
+    assetsReady=true; loadProgress=100; tick();
+  }
   function tick(){
     const now=new Date(),today=testMode||isBirthday(now),target=findNext(now);
-    card.classList.toggle('unlocked',today);
-    enter.disabled=!today;
-    enter.setAttribute('aria-disabled',String(!today));
+    card.classList.toggle('unlocked',today&&assetsReady);
+    const canEnter=today&&assetsReady;
+    enter.disabled=!canEnter;
+    enter.setAttribute('aria-disabled',String(!canEnter));
     if(today){
       dEl.textContent='0';hEl.textContent='00';mEl.textContent='00';sEl.textContent='00';
       title.textContent=testMode?'生日测试模式':'思琪，生日快乐';
       intro.innerHTML=testMode?'当前网址为 /test<br>已模拟到达农历六月十四':'今天是农历六月十四<br>写给你的二十四岁祝福已经准备好';
       targetEl.textContent=testMode?'TEST MODE · 当前日期按生日处理':'BIRTHDAY UNLOCKED · 今日限定开启';
-      lock.textContent=testMode?'BIRTHDAY TEST · 测试入口已解锁':'THE DAY IS HERE · 生日惊喜已解锁';
-      enter.textContent='开启这份祝福';
+      lock.textContent=assetsReady?(testMode?'BIRTHDAY TEST · 测试入口已解锁':'THE DAY IS HERE · 生日惊喜已解锁'):'LOADING · 正在准备全部素材';
+      enter.textContent=assetsReady?'开启这份祝福':'正在准备 '+loadProgress+'%';
       return;
     }
     let diff=Math.max(0,Math.floor((target-now)/1000));
@@ -2138,7 +2182,7 @@ body.lightbox-open { overflow:hidden; }
     lock.textContent='BIRTHDAY LOCK · 生日当天才能开启';
     enter.textContent='生日当天才能开启';
   }
-  tick();setInterval(tick,1000);
+  tick();preloadAllAssets();setInterval(tick,1000);
 })();
 
 /* ================================================================
