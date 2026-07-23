@@ -1413,7 +1413,7 @@ body.film-started .film-guide { transform:translateY(-50%); opacity:1; }
 .cinema-montage { position:absolute; inset:6%; display:grid; place-items:center; opacity:0; visibility:hidden; transition:opacity .3s,visibility .3s; }
 .cinema-montage-frame { position:relative; width:min(1120px,88vw); height:min(72vh,720px); overflow:hidden; border-radius:24px; background:#080811; box-shadow:0 36px 120px rgba(0,0,0,.78); }
 .cinema-montage-image { width:100%; height:100%; object-fit:contain; opacity:0; transform:scale(1.035); filter:saturate(.88) contrast(1.04); }
-.cinema-montage-image.flash { animation:montageFlash 2.5s ease both; }
+.cinema-montage-image.flash { animation:montageFlash var(--shot-duration,2.5s) ease both; }
 @keyframes montageFlash { 0%{opacity:0;filter:brightness(1.8) blur(7px)} 16%{opacity:1;filter:brightness(1.22) blur(0)} 82%{opacity:1} 100%{opacity:0;transform:scale(1)} }
 .cinema-montage-caption { position:absolute; left:24px; bottom:20px; color:#fff; font-size:12px; font-weight:750; letter-spacing:.14em; text-shadow:0 2px 12px #000; }
 .cinema-montage-counter { position:absolute; right:24px; bottom:20px; color:rgba(255,255,255,.6); font-size:10px; letter-spacing:.16em; }
@@ -2732,6 +2732,7 @@ document.addEventListener('click',e=>{
     {id:'finale',number:'CHAPTER 04',title:'把愿望交给星河'}
   ];
   const memories=[
+    ['assets/photos/movie-opening-title.png','序幕 · A BIRTHDAY FILM FOR SIQI',4000],
     ['assets/photos/movie-01.webp','01 · 同窗初见'],
     ['assets/photos/movie-02.webp','02 · 开心相聚'],
     ['assets/photos/movie-03.webp','03 · 毕业时刻'],
@@ -2780,16 +2781,17 @@ document.addEventListener('click',e=>{
     let index=0;
     function next(){
       if(index>=memories.length){ later(playJourney,380);return; }
-      const [src,caption]=memories[index];
+      const [src,caption,duration=2500]=memories[index];
       montageImage.classList.remove('flash');
       montageImage.src=src;
       montageImage.alt=caption;
       montageCaption.textContent=caption;
       montageCounter.textContent=String(index+1).padStart(2,'0')+' / '+String(memories.length).padStart(2,'0');
+      montageImage.style.setProperty('--shot-duration',duration+'ms');
       void montageImage.offsetWidth;
       montageImage.classList.add('flash');
       index+=1;
-      later(next,2500);
+      later(next,duration);
     }
     next();
   }
