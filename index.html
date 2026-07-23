@@ -2798,24 +2798,16 @@ document.addEventListener('click',e=>{
     {src:'assets/photos/movie-06.webp',caption:'06 · 欢乐瞬间',duration:2500},
     {src:'assets/photos/movie-07.webp',caption:'07 · 未完待续',duration:2500}
   ];
-  const backgroundVideoDurations=[13000,515000,85000,83000,113000];
   memories.forEach(item=>{ const preload=new Image();preload.src=item.src; });
   let backgroundVideosStarted=false;
   function startBackgroundVideos(){
     if(backgroundVideosStarted) return;
     backgroundVideosStarted=true;
-    const frames=Array.from(document.querySelectorAll('#gallery iframe'));
-    let videoIndex=0;
-    const playNext=()=>{
-      if(videoIndex>=frames.length) return;
-      const frame=frames[videoIndex],duration=backgroundVideoDurations[videoIndex]||60000;
+    document.querySelectorAll('#gallery iframe').forEach(frame=>{
       const url=new URL(frame.src);
       url.searchParams.set('autoplay','1');
       frame.loading='eager'; frame.src=url.toString();
-      videoIndex+=1;
-      setTimeout(playNext,duration);
-    };
-    playNext();
+    });
   }
   let active='',flashTimer=0,sequenceTimers=[],sequenceRunning=false;
 
