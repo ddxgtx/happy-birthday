@@ -1213,8 +1213,8 @@ section:not(#hero)::before { background:linear-gradient(90deg,transparent,rgba(1
 }
 .star-birthday-message span { display:block; margin-top:15px; color:#f4d9a6; font-size:10px; font-weight:800; letter-spacing:.34em; }
 .candle-rack {
-  position:absolute; left:50%; bottom:7%; width:min(620px,88vw); display:grid; grid-template-columns:repeat(12,1fr); gap:12px 8px;
-  transform:translateX(-50%); pointer-events:none;
+  position:relative; z-index:4; width:min(520px,92%); display:grid; grid-template-columns:repeat(12,1fr); gap:12px 8px;
+  align-self:end; justify-self:center; margin:0 auto 4px; transform:none; pointer-events:none;
 }
 .ritual-candle { position:relative; height:34px; opacity:0; transform:translateY(12px) scale(.8); }
 .ritual-candle::after { content:""; position:absolute; left:50%; bottom:0; width:5px; height:22px; transform:translateX(-50%); border-radius:3px; background:linear-gradient(90deg,#f3b5df,#fff1c6,#bb8cff); box-shadow:0 0 8px rgba(223,167,255,.28); }
@@ -1295,7 +1295,7 @@ section:not(#hero)::before { background:linear-gradient(90deg,transparent,rgba(1
   .star-birthday-message { top:8%; }
   .star-birthday-message strong { font-size:clamp(42px,14vw,56px); }
   .star-birthday-message span { padding-inline:18px; font-size:8px; letter-spacing:.2em; }
-  .candle-rack { bottom:9%; width:calc(100vw - 34px); grid-template-columns:repeat(8,1fr); gap:6px 4px; }
+  .candle-rack { width:min(360px,calc(100vw - 34px)); grid-template-columns:repeat(8,1fr); gap:6px 4px; margin-bottom:2px; }
   .ritual-candle { height:30px; }
   .ritual-status { bottom:2.2%; width:calc(100vw - 40px); font-size:9px; line-height:1.5; letter-spacing:.06em; white-space:normal; }
 }
@@ -1739,7 +1739,6 @@ body.lightbox-open { overflow:hidden; }
   <div class="finale-ritual" id="finaleRitual" aria-live="polite">
     <div class="star-convergence" id="starConvergence" aria-hidden="true"></div>
     <div class="star-birthday-message"><strong>生日快乐</strong><span>HAPPY 24TH BIRTHDAY · SIQI</span></div>
-    <div class="candle-rack" id="candleRack" aria-label="二十四根生日蜡烛"></div>
     <div class="ritual-status" id="ritualStatus">24 根蜡烛已经点亮 · 点击蛋糕吹灭蜡烛</div>
   </div>
   <div class="finale-stage">
@@ -1755,6 +1754,7 @@ body.lightbox-open { overflow:hidden; }
       <button class="wish-cta" id="wishCta" type="button">开始许愿</button>
     </div>
     <div class="cake-stage">
+      <div class="candle-rack" id="candleRack" aria-label="二十四根生日蜡烛"></div>
       <img class="cat-mascot cat-finale" src="assets/backgrounds/cat-star-mascot.png" alt="陪你许愿的小猫" loading="lazy" decoding="async">
       <button class="cake" id="cake" type="button" aria-label="点击二十四岁生日蛋糕许愿">
         <img id="cakeImage" src="assets/backgrounds/birthday-cake-24.png" alt="点燃数字 24 蜡烛的生日蛋糕">
