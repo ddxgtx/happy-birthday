@@ -1417,12 +1417,9 @@ body.film-started .film-guide { transform:translateY(-50%); opacity:1; }
 .cinema-montage-frame { position:relative; width:min(1120px,88vw); height:min(72vh,720px); overflow:hidden; border-radius:24px; background:#080811; box-shadow:0 36px 120px rgba(0,0,0,.78); }
 .cinema-montage-image { width:100%; height:100%; object-fit:contain; opacity:0; transform:scale(1.035); filter:saturate(.88) contrast(1.04); }
 .cinema-montage-image.flash { animation:montageFlash var(--shot-duration,2.5s) ease both; }
-.cinema-montage-video { position:absolute; inset:0; z-index:1; width:100%; height:100%; border:0; background:#000; opacity:0; visibility:hidden; transition:opacity .28s ease; }
-.cinema-montage-frame.video-mode .cinema-montage-video { opacity:1; visibility:visible; }
-.cinema-montage-frame.video-mode .cinema-montage-image { opacity:0!important; visibility:hidden; }
 @keyframes montageFlash { 0%{opacity:0;filter:brightness(1.8) blur(7px)} 16%{opacity:1;filter:brightness(1.22) blur(0)} 82%{opacity:1} 100%{opacity:0;transform:scale(1)} }
-.cinema-montage-caption { position:absolute; z-index:2; left:24px; bottom:20px; color:#fff; font-size:12px; font-weight:750; letter-spacing:.14em; text-shadow:0 2px 12px #000; }
-.cinema-montage-counter { position:absolute; z-index:2; right:24px; bottom:20px; color:rgba(255,255,255,.6); font-size:10px; letter-spacing:.16em; }
+.cinema-montage-caption { position:absolute; left:24px; bottom:20px; color:#fff; font-size:12px; font-weight:750; letter-spacing:.14em; text-shadow:0 2px 12px #000; }
+.cinema-montage-counter { position:absolute; right:24px; bottom:20px; color:rgba(255,255,255,.6); font-size:10px; letter-spacing:.16em; }
 .cinema-intro.montage .cinema-intro-kicker,.cinema-intro.montage .cinema-intro-title,.cinema-intro.montage .cinema-intro-subtitle,.cinema-intro.montage .cinema-intro-count,.cinema-intro.montage .cinema-intro-line { opacity:0; transform:translateY(-12px); }
 .cinema-intro.montage .cinema-montage { opacity:1; visibility:visible; }
 .cinema-skip { position:absolute; right:26px; bottom:24px; z-index:2; padding:9px 15px; border:1px solid rgba(255,255,255,.14); border-radius:999px; color:rgba(255,255,255,.7); background:rgba(255,255,255,.05); font:700 10px inherit; letter-spacing:.12em; cursor:pointer; }
@@ -1560,7 +1557,6 @@ body.lightbox-open { overflow:hidden; }
     <div class="cinema-montage" id="cinemaMontage" aria-live="polite">
       <div class="cinema-montage-frame">
         <img class="cinema-montage-image" id="cinemaMontageImage" alt="生日回忆闪回">
-        <iframe class="cinema-montage-video" id="cinemaMontageVideo" title="生日视频片段" allow="autoplay; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         <div class="cinema-montage-caption" id="cinemaMontageCaption"></div>
         <div class="cinema-montage-counter" id="cinemaMontageCounter"></div>
       </div>
@@ -2779,9 +2775,7 @@ document.addEventListener('click',e=>{
   const introSubtitle=document.getElementById('cinemaIntroSubtitle');
   const introCount=document.getElementById('cinemaIntroCount');
   const montage=document.getElementById('cinemaMontage');
-  const montageFrame=montage.querySelector('.cinema-montage-frame');
   const montageImage=document.getElementById('cinemaMontageImage');
-  const montageVideo=document.getElementById('cinemaMontageVideo');
   const montageCaption=document.getElementById('cinemaMontageCaption');
   const montageCounter=document.getElementById('cinemaMontageCounter');
   const skip=document.getElementById('cinemaSkip');
@@ -2795,21 +2789,34 @@ document.addEventListener('click',e=>{
     {id:'finale',number:'CHAPTER 04',title:'把愿望交给星河'}
   ];
   const memories=[
-    {type:'image',src:'assets/photos/movie-opening-title.png',caption:'序幕 · A BIRTHDAY FILM FOR SIQI',duration:4000},
-    {type:'image',src:'assets/photos/movie-01.webp',caption:'01 · 同窗初见',duration:2500},
-    {type:'video',bvid:'BV1bnRzYNEHd',caption:'VIDEO 01 · 胆小鬼',duration:13000},
-    {type:'video',bvid:'BV1fSzqYrEDa',caption:'VIDEO 02 · 给你一个直视我的机会',duration:515000},
-    {type:'video',bvid:'BV1ytRzYbEaT',caption:'VIDEO 03 · 老牟诗人握持',duration:85000},
-    {type:'video',bvid:'BV1mnRzYPERH',caption:'VIDEO 04 · 玩物机器人',duration:83000},
-    {type:'video',bvid:'BV1mnRzYPEaB',caption:'VIDEO 05 · 绝望！',duration:113000},
-    {type:'image',src:'assets/photos/movie-02.webp',caption:'02 · 开心相聚',duration:2500},
-    {type:'image',src:'assets/photos/movie-03.webp',caption:'03 · 毕业时刻',duration:2500},
-    {type:'image',src:'assets/photos/movie-04.webp',caption:'04 · 烟花之夜',duration:2500},
-    {type:'image',src:'assets/photos/movie-05.webp',caption:'05 · 青春留影',duration:2500},
-    {type:'image',src:'assets/photos/movie-06.webp',caption:'06 · 欢乐瞬间',duration:2500},
-    {type:'image',src:'assets/photos/movie-07.webp',caption:'07 · 未完待续',duration:2500}
+    {src:'assets/photos/movie-opening-title.png',caption:'序幕 · A BIRTHDAY FILM FOR SIQI',duration:4000},
+    {src:'assets/photos/movie-01.webp',caption:'01 · 同窗初见',duration:2500},
+    {src:'assets/photos/movie-02.webp',caption:'02 · 开心相聚',duration:2500},
+    {src:'assets/photos/movie-03.webp',caption:'03 · 毕业时刻',duration:2500},
+    {src:'assets/photos/movie-04.webp',caption:'04 · 烟花之夜',duration:2500},
+    {src:'assets/photos/movie-05.webp',caption:'05 · 青春留影',duration:2500},
+    {src:'assets/photos/movie-06.webp',caption:'06 · 欢乐瞬间',duration:2500},
+    {src:'assets/photos/movie-07.webp',caption:'07 · 未完待续',duration:2500}
   ];
-  memories.filter(item=>item.type==='image').forEach(item=>{ const preload=new Image();preload.src=item.src; });
+  const backgroundVideoDurations=[13000,515000,85000,83000,113000];
+  memories.forEach(item=>{ const preload=new Image();preload.src=item.src; });
+  let backgroundVideosStarted=false;
+  function startBackgroundVideos(){
+    if(backgroundVideosStarted) return;
+    backgroundVideosStarted=true;
+    const frames=Array.from(document.querySelectorAll('#gallery iframe'));
+    let videoIndex=0;
+    const playNext=()=>{
+      if(videoIndex>=frames.length) return;
+      const frame=frames[videoIndex],duration=backgroundVideoDurations[videoIndex]||60000;
+      const url=new URL(frame.src);
+      url.searchParams.set('autoplay','1');
+      frame.loading='eager'; frame.src=url.toString();
+      videoIndex+=1;
+      setTimeout(playNext,duration);
+    };
+    playNext();
+  }
   let active='',flashTimer=0,sequenceTimers=[],sequenceRunning=false;
 
   function later(callback,delay){
@@ -2817,8 +2824,6 @@ document.addEventListener('click',e=>{
   }
   function clearSequence(){
     sequenceTimers.forEach(clearTimeout);sequenceTimers=[];sequenceRunning=false;
-    montageVideo.src='about:blank';
-    montageFrame.classList.remove('video-mode');
     intro.classList.remove('show','montage');
     intro.setAttribute('aria-hidden','true');
     document.body.classList.remove('auto-film-playing');
@@ -2853,17 +2858,12 @@ document.addEventListener('click',e=>{
       if(index>=memories.length){ later(playJourney,380);return; }
       const item=memories[index];
       montageImage.classList.remove('flash');
+      montageImage.src=item.src; montageImage.alt=item.caption;
       montageCaption.textContent=item.caption;
       montageCounter.textContent=String(index+1).padStart(2,'0')+' / '+String(memories.length).padStart(2,'0');
-      if(item.type==='video'){
-        montageFrame.classList.add('video-mode'); montageVideo.title=item.caption;
-        montageVideo.src='https://player.bilibili.com/player.html?bvid='+item.bvid+'&page=1&high_quality=1&danmaku=0&autoplay=1';
-      }else{
-        montageVideo.src='about:blank'; montageFrame.classList.remove('video-mode');
-        montageImage.src=item.src; montageImage.alt=item.caption;
-        montageImage.style.setProperty('--shot-duration',item.duration+'ms');
-        void montageImage.offsetWidth; montageImage.classList.add('flash');
-      }
+      montageImage.style.setProperty('--shot-duration',item.duration+'ms');
+      void montageImage.offsetWidth; montageImage.classList.add('flash');
+      if(index===1) startBackgroundVideos();
       index+=1;
       later(next,item.duration);
     }
